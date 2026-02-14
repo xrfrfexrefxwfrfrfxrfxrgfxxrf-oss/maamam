@@ -113,14 +113,14 @@ def fetch_ip_info(ip="me"):
         print("---------------------\n")
 
     except Exception as e:
-        print("IP fetch failed:", e)
+        print(f"IP fetch failed: {e}")
 
 def public_ip():
     try:
         ip = requests.get("https://api.ipify.org").text
         print("Public IP:", ip)
-    except:
-        print("Failed")
+    except Exception as e:
+        print(f"Public IP fetch failed: {e}")
 
 # ---------------- OSINT ----------------
 def osint_email():
@@ -141,8 +141,8 @@ def osint_email():
         try:
             r = requests.get(site)
             print(f"[{'FOUND' if r.status_code == 200 else 'NOT FOUND'}] {site}")
-        except:
-            print(f"[ERROR] {site}")
+        except Exception as e:
+            print(f"[ERROR] {site}: {e}")
 
 def subdomain_lookup():
     domain = input("Domain: ")
@@ -153,8 +153,8 @@ def subdomain_lookup():
         try:
             ip = socket.gethostbyname(full)
             print(f"[FOUND] {full} -> {ip}")
-        except:
-            pass
+        except Exception as e:
+            print(f"[ERROR] {full}: {e}")
     print()
 
 def whois_lookup():
@@ -165,24 +165,28 @@ def whois_lookup():
         for key, value in w.items():
             print(f"{key}: {value}")
     except Exception as e:
-        print("Whois lookup failed:", e)
+        print(f"Whois lookup failed: {e}")
 
 def dns_lookup():
     domain = input("Domain: ")
     try:
         ip = socket.gethostbyname(domain)
         print("IP:", ip)
-    except:
-        print("DNS failed")
+    except Exception as e:
+        print(f"DNS lookup failed: {e}")
 
 def port_scan():
     print("\nScanning localhost ports 1-1024...\n")
     for port in range(1, 1025):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(0.2)
-        if s.connect_ex(("127.0.0.1", port)) == 0:
-            print(f"Port {port} OPEN")
-        s.close()
+        try:
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                print(f"Port {port} OPEN")
+        except Exception as e:
+            print(f"Port scan failed on port {port}: {e}")
+        finally:
+            s.close()
 
 # ---------------- MAIN ----------------
 def run_osint():
@@ -213,35 +217,24 @@ def main():
     banner()
 
     while True:
-        cmd = input_command().lower()
+        try:
+            cmd = input_command().lower()
 
-        if cmd == "exit":
-            break
-        elif cmd == "clear":
-            clear(); banner()
-        elif cmd == "neofetch":
-            neofetch()
-        elif cmd == "ip":
-            fetch_ip_info("me")
-        elif cmd == "fetch ip":
-            ip = input("Enter IP: ")
-            fetch_ip_info(ip)
-        elif cmd == "publicip":
-            public_ip()
-        elif cmd == "osint":
-            run_osint()
-        elif cmd == "osint email":
-            osint_email()
-        elif cmd == "subdomains":
-            subdomain_lookup()
-        elif cmd == "dns":
-            dns_lookup()
-        elif cmd == "ports":
-            port_scan()
-        elif cmd == "whois":
-            whois_lookup()
-        else:
-            print("Unknown command")
+            if cmd == "exit":
+                break
+            elif cmd == "clear":
+                clear(); banner()
+            elif cmd == "neofetch":
+                neofetch()
+            elif cmd == "ip":
+                fetch_ip_info("me")
+            elif cmd == "fetch ip":
+                ip = input("Enter IP: ")
+                fetch_ip_info(ip)
+            elif cmd == "publicip":
+                public_ip()
+            elif cmd == "osint":
+                run_osint()
+            elif cmd == "osint email":
+                osint_email
 
-if __name__ == "__main__":
-    main()
